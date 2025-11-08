@@ -10,7 +10,25 @@ head(df)
 colnames(df)
 
 ##brainstorm##
-#verificar quantidade de gêneros e espécies 
+# verificar quantidade de gêneros e espécies 
+nrow(df) # 57 spp
+contagem_gen <- df %>% 
+  count(Genus) %>%
+  mutate(porcentagem = round(n / sum(n) * 100, digits = 1))
+
+ggplot(contagem_gen, aes(x = "", y = n, fill = Genus)) +
+  geom_bar(stat = "identity", position = "stack") +
+  coord_polar(theta = "y") +
+  theme_minimal()+
+  geom_text(
+    aes(label = porcentagem), 
+    position = position_stack(vjust = 0.5)
+  ) +
+  scale_fill_brewer(palette = "Set3") +
+  labs(
+    title = "Distribuição de Espécies por Gênero (Cracidae)",
+    fill = "Gêneros" 
+  )
 #Status de conservaçao - por genero? por distribuicao geografica? 
 #visão geral da massa corporal
 #visão geral sobre a alimentacao e uso de habitat?
@@ -26,6 +44,7 @@ colnames(df)
 #HB = Habitat breadth, the number of major habitats used
 #DB = Diet breadth, the number of major food types consumed
 #ESI = Ecological Specialization Index: log10 (100/[dietary breadth x habitat breadth]), with a maximum of 2 for the most specialized species that only feed on one major food group and live in one major type of habitat (e.g., forest frugivore; Sekercioglu, 2011)
+
 
 
 
