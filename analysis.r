@@ -12,24 +12,35 @@ colnames(df)
 ##brainstorm##
 # verificar quantidade de gêneros e espécies 
 nrow(df) # 57 spp
+
 contagem_gen <- df %>% 
   count(Genus) %>%
   mutate(porcentagem = round(n / sum(n) * 100, digits = 1))
-
+#gráfico de pizza
 ggplot(contagem_gen, aes(x = "", y = n, fill = Genus)) +
   geom_bar(stat = "identity", position = "stack") +
   coord_polar(theta = "y") +
-  theme_minimal()+
-  geom_text(
-    aes(label = porcentagem), 
-    position = position_stack(vjust = 0.5)
-  ) +
+  theme_void()+
+  # geom_text(
+  #   aes(label = porcentagem), 
+  #   position = position_stack(vjust = 0.5)
+  # ) +
   scale_fill_brewer(palette = "Set3") +
   labs(
     title = "Distribuição de Espécies por Gênero (Cracidae)",
-    fill = "Gêneros" 
+    fill = "Gêneros", x = "", y = ""
+  ) +
+  theme(
+    legend.title = element_text(size = 12),
+    legend.text = element_text(face = "italic", size = 12)
   )
+
+ggsave("primeiro_grafico.png")
+
 #Status de conservaçao - por genero? por distribuicao geografica? 
+
+contagem_conserv <- df %>% 
+  count(Genus, X2024.IUCN.Red.List.category) 
 #visão geral da massa corporal
 #visão geral sobre a alimentacao e uso de habitat?
 
