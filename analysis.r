@@ -99,7 +99,155 @@ ggplot(media_massa_gen, aes(x = Genus, y = media_massa, fill = Genus)) +
 # display.brewer.all()
 
 
-#visão geral sobre a alimentacao e uso de habitat?
+#visão geral sobre ocorrencias
+#contagem de Restricted range
+df %>% 
+  count(RR)
+
+#contagem de species' breeding is restricted to island(s) (seria endêmicas)
+df %>% 
+  count(ISL)
+
+df %>%
+  filter(ISL == T) #verifiquei que é a espécie Pipile pipile
+
+df %>% 
+  count(RLM) #todos são neotropical
+
+df %>%
+  count(LAT)
+
+#amplitude altitudional
+df %>%
+  count(Elevational.Range)
+
+str(df)
+
+media_alt_gen <- df %>%
+  group_by(Genus) %>%
+  summarise(media_altitude = mean(Elevational.Range, na.rm = TRUE))
+
+ggplot(media_alt_gen, aes(y = media_altitude, x = Genus)) +  
+  geom_bar(stat = "identity", fill = "steelblue") +
+  theme_minimal()+
+  theme(axis.text.x = element_text(face = "italic"))
+  
+ggplot(media_alt_gen, aes(x = media_altitude)) +
+  geom_histogram(bins = 15, fill = "steelblue")
+
+#boxplot
+ggplot(df, aes(x = Genus, y = Elevational.Range, fill = Genus)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = "Paired")+
+  theme_classic() +
+  theme(axis.text.x = element_text(face = "italic"),
+        legend.position = "none")
+
+#Uso de habitat
+df %>%
+  count(Primary.Habitat)
+
+uso_habitat <- df %>% 
+  count(Primary.Habitat) %>%
+  mutate(porcentagem = round(n / sum(n) * 100, digits = 1))
+
+
+#gráfico de pizza
+ggplot(uso_habitat, aes(x = "", y = n, fill = Primary.Habitat)) +
+  geom_bar(stat = "identity", position = "stack") +
+  coord_polar(theta = "y") +
+  scale_fill_discrete(labels = c("Forest" = "Floresta",
+                      "Shrub" = "Arbusto",
+                      "Woodland" = "Bosque"))+
+  scale_fill_manual(values = c(
+    "Forest" = "green",
+    "Shrub" = "yellow",
+    "Woodland" = "green4"
+  ))+
+  theme_void()+
+  labs(
+    title = "Uso do Habitat (Cracidae)",
+    fill = "Habitat", x = "", y = ""
+  ) +
+  theme(
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 12)
+  )
+
+#Dieta
+df %>%
+  count(Primary.Diet)
+
+dieta <- df %>% 
+  count(Primary.Diet) %>%
+  mutate(porcentagem = round(n / sum(n) * 100, digits = 1))
+
+
+#gráfico de pizza
+ggplot(dieta, aes(x = "", y = n, fill = Primary.Diet)) +
+  geom_bar(stat = "identity", position = "stack") +
+  coord_polar(theta = "y") +
+  scale_fill_discrete(labels = c("Fruit" = "Fruta",
+                                 "Herbivore" = "Herbívoro",
+                                 "Omnivore" = "Onívoro",
+                                 "Plant" = "Plantas"))+
+  scale_fill_manual(values = c(
+    "Fruit" = "red3",
+    "Herbivore" = "green3",
+    "Omnivore" = "orange3",
+    "Plant" = "green"
+  ))+
+  theme_void()+
+  labs(
+    title = "Dieta (Cracidae)",
+    fill = "Dieta", x = "", y = ""
+  ) +
+  theme(
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 12)
+  )
+
+#amplitude da dieta
+#boxplot
+ggplot(df, aes(x = Genus, y = DB, fill = Genus)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = "Paired")+
+  theme_classic() +
+  theme(axis.text.x = element_text(face = "italic"),
+        legend.position = "none")
+
+#ESI
+especialidade <- df %>%
+  select(Latin, Genus, ESI) %>%
+  mutate(ESI = as.numeric(ESI)) %>%
+  mutate(nível_especialidade = case_when(
+    ESI < 1 ~ "Generalista",
+    ESI == 1 ~ "Médio especialista",
+    TRUE ~ "Especialistas"
+  ))
+#geral
+ggplot(especialidade, aes(x = "", y = ESI, fill = nível_especialidade)) +
+  geom_bar(stat = "identity", position = "stack") +
+  coord_polar(theta = "y") +
+  scale_fill_brewer(palette = "Set3") +
+  theme_minimal() +
+  labs(
+    fill = "Nível de especialidade ecológica", x = "", y = ""
+  ) 
+  
+#por gênero
+ggplot(especialidade, 
+       aes(x = Genus, fill = nível_especialidade)) +
+   geom_bar(position = "fill") + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(face = "italic", size = 12, angle = 45, hjust = 1)) +
+  labs(
+    fill = "Especialidade ecológica",
+    x = "Gêneros",
+    y = "ESI em proporção"
+  )
+
+
 
 ##informacao das legendas##
 #RR = Restricted range (global range size<50,000 km2 ) species get a 1
