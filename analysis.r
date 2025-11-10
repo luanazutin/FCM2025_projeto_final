@@ -39,9 +39,66 @@ ggsave("primeiro_grafico.png")
 
 #Status de conservaçao - por genero? por distribuicao geografica? 
 
-contagem_conserv <- df %>% 
-  count(Genus, X2024.IUCN.Red.List.category) 
+dados_ameacados <- df %>% 
+  count(Genus, X2024.IUCN.Red.List.category) %>% 
+  filter(X2024.IUCN.Red.List.category %in% c("VU", "EN", "CR"))
+
+ggplot(dados_ameacados, aes(x = Genus, y = n, fill = X2024.IUCN.Red.List.category)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  theme_minimal() +
+  scale_fill_manual(values = c(
+    "VU" = "gold",
+    "EN" = "darkorange",
+    "CR" = "firebrick" 
+  )) +
+  labs(
+    title = "Status de ameaça por Gênero",
+    x = "Gêneros",
+    y = "total", 
+    fill = "Status de ameaça IUCN"
+  )
+
+
 #visão geral da massa corporal
+df <- df %>% 
+  mutate(Average.Mass = as.numeric(Average.Mass))
+
+summary(df$Average.Mass)
+
+#histograma
+ggplot(df, aes (x = Average.Mass))+
+  geom_histogram(bins = 15)+
+  theme_minimal()
+
+#boxplot
+ggplot(df, aes(x = "", y = Average.Mass)) +
+  geom_boxplot() +
+  theme_classic()
+
+media_massa_gen <- df %>%
+  group_by(Genus) %>%
+  summarise(media_massa = mean(Average.Mass, na.rm = TRUE))
+
+ggplot(media_massa_gen, aes(x = Genus, y = media_massa, fill = Genus)) +
+  geom_bar(stat = "identity") +
+  scale_fill_brewer(palette = "Paired")+
+  coord_flip() +
+    labs(
+    title = "Média da massa por gêneros",
+    x = "Gêneros",
+    y = "Média da massa corporal"
+  ) +
+  theme_classic() +
+  theme(
+    legend.title = element_text(size = 12),
+    axis.text.y = element_text(face = "italic", size = 12),
+    legend.position = "none"
+  )
+# library(RColorBrewer)
+# display.brewer.all()
+
+
 #visão geral sobre a alimentacao e uso de habitat?
 
 ##informacao das legendas##
