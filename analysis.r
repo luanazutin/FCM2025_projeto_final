@@ -278,7 +278,7 @@ ggsave("graficos/grafico_ESI_gen.png", plot = grafico_ESI_genero, width = 8, hei
 #ESI = Ecological Specialization Index: log10 (100/[dietary breadth x habitat breadth]), with a maximum of 2 for the most specialized species that only feed on one major food group and live in one major type of habitat (e.g., forest frugivore; Sekercioglu, 2011)
 
 
-## Exportar tabelas resumo
+## Exportar tabelas - tabela com resumo dos dados mineirados
 write.xlsx(list(
   "Contagem por gênero" = contagem_gen,
   "Espécies ameaçadas" = dados_ameacados,
