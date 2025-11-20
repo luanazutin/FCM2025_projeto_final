@@ -354,4 +354,8 @@ ggplot(especialidade,
 ```
 
 ## Conclusão
- * 
+Com base nas análises realizadas, foi possível organizar e visualizar melhor as informações sobre a família Cracidae.
+
+Os gráficos e tabelas ajudaram a compreender como os dados se distribuem e quais padrões se destacam. De forma geral, o estudo mostrou que as espécies dependem de áreas bem preservadas e apresentam diferenças importantes na forma como ocupam o ambiente.
+
+Assim, o trabalho reuniu, analisou e resumiu os dados mais relevantes de maneira objetiva, oferecendo uma visão clara e acessível sobre o grupo de aves estudado.
