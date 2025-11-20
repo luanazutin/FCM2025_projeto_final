@@ -6,16 +6,16 @@ output:
   ioslides_presentation: 
     logo: logo.png
 ---
+
 ## Introdução
 
-* Banco de dados: BIRDBASE
-* DOI: https://doi.org/10.1038/s41597-025-05615-3
-* Família Cracidae 
+-   Banco de dados: BIRDBASE
+-   DOI: <https://doi.org/10.1038/s41597-025-05615-3>
+-   Família Cracidae
 
 ```{r, echo=FALSE, out.width="60%", fig.align='right'}
 knitr::include_graphics("cracidae3.jpg")
 ```
-
 
 ## Importando os dados
 
@@ -64,7 +64,6 @@ ggplot(contagem_gen, aes(x = "", y = n, fill = Genus)) +
   )
 ```
 
-
 ## Status de conservacao
 
 ```{r}
@@ -73,7 +72,6 @@ dados_ameacados <- df %>%
   filter(X2024.IUCN.Red.List.category %in% c("VU", "EN", "CR"))
 
 ```
-
 
 ## Status de conservacao
 
@@ -95,7 +93,6 @@ ggplot(dados_ameacados, aes(x = Genus, y = n, fill = X2024.IUCN.Red.List.categor
   )
 ```
 
-
 ## Massa corporal
 
 ```{r}
@@ -107,8 +104,8 @@ summary(df$Average.Mass)
 
 ```
 
-
 ## Histograma
+
 ```{r, echo=FALSE}
 
 ggplot(df, aes (x = Average.Mass))+
@@ -117,6 +114,7 @@ ggplot(df, aes (x = Average.Mass))+
 ```
 
 ## Boxplot
+
 ```{r, echo=FALSE}
 ggplot(df, aes(x = "", y = Average.Mass)) +
   geom_boxplot() +
@@ -133,7 +131,6 @@ media_massa_gen <- df %>%
   summarise(media_massa = mean(Average.Mass, na.rm = TRUE))
 
 ```
-
 
 ## 
 
@@ -155,9 +152,7 @@ ggplot(media_massa_gen, aes(x = Genus, y = media_massa, fill = Genus)) +
   )
 ```
 
-
-
-## Ocorrências 
+## Ocorrências
 
 ```{r}
 #contagem de Restricted range
@@ -181,7 +176,6 @@ df %>%
 knitr::include_graphics("Pipile pipile.jpg")
 ```
 
-
 ## Ocorrências
 
 ```{r}
@@ -189,7 +183,6 @@ knitr::include_graphics("Pipile pipile.jpg")
 df %>% 
   count(RLM) 
 ```
-
 
 ## Amplitude Altitudinal
 
@@ -205,7 +198,7 @@ media_alt_gen <- df %>%
 
 ```
 
-##
+## 
 
 ```{r, echo = FALSE}
 ggplot(df, aes(x = Genus, y = Elevational.Range, fill = Genus)) +
@@ -215,7 +208,6 @@ ggplot(df, aes(x = Genus, y = Elevational.Range, fill = Genus)) +
   theme(axis.text.x = element_text(face = "italic"),
         legend.position = "none")
 ```
-
 
 ## Ecologia - Uso do habitat
 
@@ -231,7 +223,7 @@ uso_habitat <- df %>%
 
 ```
 
-##
+## 
 
 ```{r, echo=FALSE}
 ggplot(uso_habitat, aes(x = "", y = n, fill = Primary.Habitat)) +
@@ -257,7 +249,6 @@ ggplot(uso_habitat, aes(x = "", y = n, fill = Primary.Habitat)) +
 
 ```
 
-
 ## Ecologia - Dieta
 
 ```{r}
@@ -270,7 +261,7 @@ dieta <- df %>%
 
 ```
 
-##
+## 
 
 ```{r, echo=FALSE}
 ggplot(dieta, aes(x = "", y = n, fill = Primary.Diet)) +
@@ -322,7 +313,7 @@ especialidade <- df %>%
   ))
 ```
 
-##
+## 
 
 ```{r, echo = FALSE}
 ggplot(especialidade, aes(x = "", y = ESI, fill = nível_especialidade)) +
@@ -336,9 +327,7 @@ ggplot(especialidade, aes(x = "", y = ESI, fill = nível_especialidade)) +
 
 ```
 
-
-
-##
+## 
 
 ```{r, echo = FALSE}
 ggplot(especialidade, 
@@ -354,6 +343,7 @@ ggplot(especialidade,
 ```
 
 ## Conclusão
+
 Com base nas análises realizadas, foi possível organizar e visualizar melhor as informações sobre a família Cracidae.
 
 Os gráficos e tabelas ajudaram a compreender como os dados se distribuem e quais padrões se destacam. De forma geral, o estudo mostrou que as espécies dependem de áreas bem preservadas e apresentam diferenças importantes na forma como ocupam o ambiente.
