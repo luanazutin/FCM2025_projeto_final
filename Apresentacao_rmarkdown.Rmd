@@ -353,6 +353,16 @@ ggplot(especialidade,
   )
 ```
 
+# Teste Kruskal–Wallis
+
+
+
+
+
+
+
+
+
 ## Conclusão
 Com base nas análises realizadas, foi possível organizar e visualizar melhor as informações sobre a família Cracidae.
 

@@ -1,0 +1,92 @@
+---
+title: "minha_apersentacao"
+output: ioslides_presentation
+date: "2025-11-21"
+---
+
+# Teste
+## Histograma da Massa Corporal
+
+```{r histograma-massa, echo=FALSE, message=FALSE, warning=FALSE}
+df <- read.csv2("Base_dados_Cracidae.csv")
+
+df$Average.Mass <- as.numeric(df$Average.Mass)
+
+summary(df$Average.Mass)
+
+library(ggplot2)
+
+ggplot(df, aes(x = Average.Mass)) +
+  geom_histogram(
+    bins = 12,
+    fill = "#69b3a2",
+    color = "white",
+    alpha = 0.9,
+    size = 0.3
+  ) +
+  scale_x_continuous(
+    breaks = seq(0, 4000, by = 500),
+    limits = c(0, 4000)
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Histograma da massa corporal média (Cracidae)",
+    x = "Massa corporal média (g)",
+    y = "Frequência"
+  ) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+
+## Teste Kruskal–Wallis
+
+```{r}
+kruskal.test(Average.Mass ~ Genus, data = df)
+```
+
+
+
+## Comparações Pós-Hoc
+
+
+```{r}
+resultado <- pairwise.wilcox.test(
+  df$Average.Mass, df$Genus,
+  p.adjust.method = "bonferroni"
+)
+
+# reduzir o tamanho da fonte e compactar linha/coluna
+knitr::kable(
+  resultado$p.value,
+  format = "html",
+  table.attr='style="font-size:12px; width:100%;"'
+)
+
+
+```
+
+
+## Boxplot da Massa por Gênero
+
+```{r}
+library(ggplot2)
+
+ggplot(df, aes(x = Genus, y = Average.Mass, fill = Genus)) +
+  geom_boxplot() +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, face = "italic"),
+    legend.position = "none"
+  ) +
+  labs(
+    title = "Distribuição da massa corporal por gênero (Cracidae)",
+    x = "Gênero",
+    y = "Massa corporal média (g)"
+  )
+```
+
+
+
