@@ -1,0 +1,420 @@
+---
+title: "Ferramentas Computacionais de Modelagem - Trabalho"
+author: "Julia Kaori Kuriyama Ramos, Luana Araujo Zutin, Maria Angélica Padovani Ederli"
+date: "`r Sys.Date()`"
+output: 
+  powerpoint_presentation:
+---
+
+## Introdução
+
+-   Banco de dados: BIRDBASE
+-   DOI: <https://doi.org/10.1038/s41597-025-05615-3>
+-   Família Cracidae
+
+```{r, echo=FALSE, out.width="60%", fig.align='right'}
+knitr::include_graphics("cracidae3.jpg")
+```
+
+## Importando os dados
+
+```{r, setup, message=FALSE, warning=FALSE}
+library(tidyverse)
+df <- read.csv2("Base_dados_Cracidae.csv")
+
+head(df)
+
+```
+
+## Contagem geral dos dados
+
+```{r}
+# Riqueza 
+nrow(df)
+
+# Contagem dos gêneros
+contagem_gen <- df %>% 
+  count(Genus) %>%
+  mutate(porcentagem = round(n / sum(n) * 100, digits = 1))
+
+```
+
+## Contagem dos gêneros
+
+```{r, echo = F}
+
+#gráfico de pizza
+ggplot(contagem_gen, aes(x = "", y = n, fill = Genus)) +
+  geom_bar(stat = "identity", position = "stack") +
+  coord_polar(theta = "y") +
+  theme_void()+
+  # geom_text(
+  #   aes(label = porcentagem), 
+  #   position = position_stack(vjust = 0.5)
+  # ) +
+  scale_fill_brewer(palette = "Set3") +
+  labs(
+    title = "Distribuicao de Especies por Genero (Cracidae)",
+    fill = "Generos", x = "", y = ""
+  ) +
+  theme(
+    legend.title = element_text(size = 12),
+    legend.text = element_text(face = "italic", size = 12)
+  )
+```
+
+## Status de conservacao
+
+```{r}
+dados_ameacados <- df %>% 
+  count(Genus, X2024.IUCN.Red.List.category) %>% 
+  filter(X2024.IUCN.Red.List.category %in% c("VU", "EN", "CR"))
+
+```
+
+## Status de conservacao
+
+```{r, echo=FALSE}
+ggplot(dados_ameacados, aes(x = Genus, y = n, fill = X2024.IUCN.Red.List.category)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  theme_minimal() +
+  scale_fill_manual(values = c(
+    "VU" = "gold",
+    "EN" = "darkorange",
+    "CR" = "firebrick" 
+  )) +
+  labs(
+    title = "Status de ameaça por Gênero",
+    x = "Gêneros",
+    y = "total", 
+    fill = "Status de ameaça IUCN"
+  )
+```
+
+## Massa corporal
+
+```{r}
+
+df <- df %>% 
+  mutate(Average.Mass = as.numeric(Average.Mass))
+
+summary(df$Average.Mass)
+
+```
+
+## Histograma da Massa Corporal
+
+```{r histograma-massa, echo=FALSE, message=FALSE, warning=FALSE}
+
+ggplot(df, aes(x = Average.Mass)) +
+  geom_histogram(
+    bins = 12,
+    fill = "#69b3a2",
+    color = "white",
+    alpha = 0.9,
+    size = 0.3
+  ) +
+  scale_x_continuous(
+    breaks = seq(0, 4000, by = 500),
+    limits = c(0, 4000)
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Histograma da massa corporal média (Cracidae)",
+    x = "Massa corporal média (g)",
+    y = "Frequência"
+  ) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+
+## Teste Kruskal–Wallis
+
+#Existe diferença no tamanho corporal entre os gêneros?
+
+```{r}
+kruskal.test(Average.Mass ~ Genus, data = df)
+
+```
+
+## Comparações Pós-Hoc
+
+```{r}
+resultado <- pairwise.wilcox.test(
+  df$Average.Mass, df$Genus,
+  p.adjust.method = "bonferroni"
+)
+
+# reduzir o tamanho da fonte e compactar linha/coluna
+knitr::kable(
+  resultado$p.value,
+  format = "html",
+  table.attr='style="font-size:12px; width:100%;"'
+)
+
+
+```
+
+## Boxplot da Massa por Gênero
+
+```{r}
+library(ggplot2)
+
+ggplot(df, aes(x = Genus, y = Average.Mass, fill = Genus)) +
+  geom_boxplot() +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, face = "italic"),
+    legend.position = "none"
+  ) +
+  labs(
+    title = "Distribuição da massa corporal por gênero (Cracidae)",
+    x = "Gênero",
+    y = "Massa corporal média (g)"
+  )
+```
+
+## Ocorrências
+
+```{r}
+#contagem de Restricted range (Alcance restrito)
+df %>% 
+  count(RR)
+
+#contagem de species' breeding is restricted to island(s) (seria endêmicas)
+df %>% 
+  count(ISL)
+```
+
+## Espécie endêmica
+
+```{r}
+#verificou-se que é a espécie Pipile pipile
+df %>%
+  filter(ISL == T) 
+```
+
+```{r, echo=FALSE, out.width="40%", fig.align="center",}
+knitr::include_graphics("Pipile pipile.jpg")
+```
+
+## Ocorrências (continuação)
+
+```{r}
+#todos são neotropicais
+df %>% 
+  count(RLM) 
+```
+
+## Amplitude Altitudinal
+
+```{r}
+df %>%
+  count(Elevational.Range)
+
+str(df)
+
+media_alt_gen <- df %>%
+  group_by(Genus) %>%
+  summarise(media_altitude = mean(Elevational.Range, na.rm = TRUE))
+
+```
+
+## 
+
+```{r, echo = FALSE}
+ggplot(df, aes(x = Genus, y = Elevational.Range, fill = Genus)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = "Paired")+
+  theme_classic() +
+  theme(axis.text.x = element_text(face = "italic"),
+        legend.position = "none")
+```
+
+##Relação entre massa corporal e faixa de elevação #Espécies maiores precisam de áreas maiores (ou faixas de elevação maiores)?
+
+```{r}
+# Teste de Correlação
+cor.test(df$Average.Mass, df$Elevational.Range, method = "spearman")
+
+# Gráfico para visualizar (Scatterplot)
+ggplot(df, aes(x = Average.Mass, y = Elevational.Range)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(x = "Massa média", y = "Faixa de elevação")
+```
+
+## Ecologia - Uso do habitat
+
+```{r}
+
+#Uso de habitat
+df %>%
+  count(Primary.Habitat)
+
+uso_habitat <- df %>% 
+  count(Primary.Habitat) %>%
+  mutate(porcentagem = round(n / sum(n) * 100, digits = 1))
+
+```
+
+## 
+
+```{r, echo=FALSE}
+ggplot(uso_habitat, aes(x = "", y = n, fill = Primary.Habitat)) +
+  geom_bar(stat = "identity", position = "stack") +
+  coord_polar(theta = "y") +
+  scale_fill_manual(values = c(
+    "Forest" = "green",
+    "Shrub" = "yellow",
+    "Woodland" = "green4"
+  ), labels = c("Forest" = "Floresta",
+                      "Shrub" = "Arbusto",
+                      "Woodland" = "Bosque"))+
+  theme_void()+
+  labs(
+    title = "Uso do Habitat (Cracidae)",
+    fill = "Habitat", x = "", y = ""
+  ) +
+  theme(
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 12)
+  )
+
+```
+
+## Ecologia - Dieta
+
+```{r}
+df %>%
+  count(Primary.Diet)
+
+dieta <- df %>% 
+  count(Primary.Diet) %>%
+  mutate(porcentagem = round(n / sum(n) * 100, digits = 1))
+
+```
+
+## 
+
+```{r, echo=FALSE}
+ggplot(dieta, aes(x = "", y = n, fill = Primary.Diet)) +
+  geom_bar(stat = "identity", position = "stack") +
+  coord_polar(theta = "y") +
+  scale_fill_manual(values = c(
+    "Fruit" = "red3",
+    "Herbivore" = "green3",
+    "Omnivore" = "orange3",
+    "Plant" = "green"
+  ),
+  labels = c("Fruit" = "Fruta",
+                                 "Herbivore" = "Herbívoro",
+                                 "Omnivore" = "Onívoro",
+                                 "Plant" = "Plantas"))+
+  theme_void()+
+  labs(
+    title = "Dieta (Cracidae)",
+    fill = "Dieta", x = "", y = ""
+  ) +
+  theme(
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 12)
+  )
+```
+
+## Amplitude da dieta
+
+```{r, echo = FALSE}
+ggplot(df, aes(x = Genus, y = DB, fill = Genus)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = "Paired")+
+  theme_classic() +
+  theme(axis.text.x = element_text(face = "italic"),
+        legend.position = "none")
+```
+
+## Ecologia - Especializacao
+
+```{r}
+
+especialidade <- df %>%
+  select(Latin, Genus, ESI) %>%
+  mutate(ESI = as.numeric(ESI)) %>%
+  mutate(nível_especialidade = case_when(
+    ESI < 1 ~ "Generalista",
+    ESI == 1 ~ "Médio especialista",
+    TRUE ~ "Especialistas"
+  ))
+```
+
+## 
+
+```{r, echo = FALSE}
+ggplot(especialidade, aes(x = "", y = ESI, fill = nível_especialidade)) +
+  geom_bar(stat = "identity", position = "stack") +
+  coord_polar(theta = "y") +
+  scale_fill_brewer(palette = "Set3") +
+  theme_minimal() +
+  labs(
+    fill = "Nível de especialidade ecológica", x = "", y = ""
+  ) 
+
+```
+
+## 
+
+```{r, echo = FALSE}
+ggplot(especialidade, 
+       aes(x = Genus, fill = nível_especialidade)) +
+   geom_bar(position = "fill") + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(face = "italic", size = 12, angle = 45, hjust = 1)) +
+  labs(
+    fill = "Especialidade ecológica",
+    x = "Gêneros",
+    y = "ESI em proporção"
+  )
+```
+
+##Relação entre especialização e status de conservação
+#Espécies especialistas estão mais ameaçadas de extinção?
+
+```{r}
+#adicionando a informação de status
+
+especialidade <- especialidade %>%
+  left_join(
+    df %>% select(Latin, `X2024.IUCN.Red.List.category`), 
+    by = "Latin" 
+  )
+
+ordem_iucn <- c("EX", "EW", "CR", "EN", "VU", "NT", "LC")
+
+especialidade <- especialidade %>%
+  mutate(X2024.IUCN.Red.List.category = factor(
+    X2024.IUCN.Red.List.category, 
+    levels = ordem_iucn
+  ))
+
+kruskal.test(ESI ~ X2024.IUCN.Red.List.category, data = especialidade)
+
+# Visualização 
+ggplot(especialidade, aes(x = X2024.IUCN.Red.List.category, y = ESI, fill = X2024.IUCN.Red.List.category)) +
+  geom_boxplot() +
+  theme_classic() +
+  scale_fill_brewer(palette = "Spectral")
+```
+
+
+## Conclusão
+
+Com base nas análises realizadas, foi possível organizar e visualizar melhor as informações sobre a família Cracidae.
+
+Os gráficos e tabelas ajudaram a compreender como os dados se distribuem e quais padrões se destacam. De forma geral, o estudo mostrou que as espécies dependem de áreas bem preservadas e apresentam diferenças importantes na forma como ocupam o ambiente.
+
+Assim, o trabalho reuniu, analisou e resumiu os dados mais relevantes de maneira objetiva, oferecendo uma visão clara e acessível sobre o grupo de aves estudado.
