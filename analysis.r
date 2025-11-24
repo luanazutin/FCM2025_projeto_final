@@ -6,7 +6,7 @@ df <- read.csv2("Base_dados_Cracidae.csv")
 names(df)
 head(df)
 colnames(df)
-
+str(df)
 ##brainstorm##
 #criar pasta para salvar os gráficos
 if (!dir.exists("graficos")) {
@@ -104,12 +104,50 @@ grafico_media_massa_gen <- ggplot(media_massa_gen, aes(x = Genus, y = media_mass
     axis.text.y = element_text(face = "italic", size = 12),
     legend.position = "none"
   )
-ggsave("graficos/grafico_media_massa_gen.png", plot = grafico_media_massa_gen, width = 8, height = 6)**
+#ggsave("graficos/grafico_media_massa_gen.png", plot = grafico_media_massa_gen, width = 8, height = 6)**
   
-  #library(RColorBrewer)
-  #display.brewer.all()
+#library(RColorBrewer)
+#display.brewer.all()
   
-  
+# testes
+library(agricolae)
+df$Average.Mass <- as.numeric(df$Average.Mass)
+modelo <- kruskal(df$Average.Mass, df$Genus, group = TRUE, p.adj = "bonferroni")
+print(modelo$groups)
+letras <- modelo$groups
+letras$Genus <- rownames(letras)
+
+# Calcular o máximo da massa por gênero
+alturas_maximas <- df %>%
+  group_by(Genus) %>%
+  summarise(max_y = max(Average.Mass, na.rm = TRUE))
+
+# Juntar as letras com as alturas
+dados_finais_letras <- left_join(letras, alturas_maximas, by = "Genus")
+
+
+
+ggplot(df, aes(x = Genus, y = Average.Mass, fill = Genus)) +
+  geom_boxplot() +
+  theme_minimal() +
+  geom_text(
+    data = dados_finais_letras,            
+    aes(x = Genus, y = max_y, label = groups), 
+    vjust = -0.5,               
+    fontface = "bold",           
+    inherit.aes = FALSE, 
+    size = 4
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, face = "italic"),
+    legend.position = "none"
+  ) +
+  labs(
+    title = "Distribuição da massa corporal por gênero (Cracidae)",
+    x = "Gênero",
+    y = "Massa corporal média (g)"
+  )
+
   #visão geral sobre ocorrencias
   #contagem de Restricted range
   df %>% 
@@ -133,6 +171,12 @@ df %>%
   count(Elevational.Range)
 
 str(df)
+
+# Teste de normalidade para a Massa
+shapiro.test(df$Average.Mass)
+
+# Teste de normalidade para a Altitude
+shapiro.test(df$Elevational.Range)
 
 #altitude média por gênero
 media_alt_gen <- df %>%
@@ -161,9 +205,17 @@ grafico_altitude_box <- ggplot(df, aes(x = Genus, y = Elevational.Range, fill = 
   geom_boxplot() +
   scale_fill_brewer(palette = "Paired")+
   theme_classic() +
-  theme(axis.text.x = element_text(face = "italic"),
-        legend.position = "none")
-ggsave("graficos/grafico_altitude_box.png", plot = grafico_altitude_box, width = 8, height = 6)
+  theme(axis.text.x = element_text(face = "italic", size = 12),
+        legend.position = "none",
+        axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.text.y = element_text(size = 12))
+ggsave("graficos/grafico_altitude_box.png", 
+       plot = grafico_altitude_box,
+       unit = "mm",
+       width = 250,
+       height = 150,
+       dpi = 300)
 
 #Uso de habitat - gráfico de pizza
 uso_habitat <- df %>%
@@ -228,7 +280,17 @@ grafico_dieta_boxplot <- ggplot(df, aes(x = Genus, y = DB, fill = Genus)) +
   scale_fill_brewer(palette = "Paired")+
   theme_classic() +
   theme(axis.text.x = element_text(face = "italic"),
-        legend.position = "none")
+        legend.position = "none",
+        axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.text.y = element_text(size = 12)) +
+  labs(title = "Amplitude da dieta")
+
+ggsave("graficos/amplitude_dieta.png", 
+       plot = grafico_dieta_boxplot, unit = "mm",
+       width = 250,
+       height = 150,
+       dpi = 300)
 
 #ESI
 especialidade <- df %>%
@@ -244,24 +306,28 @@ grafico_ESI_geral <- ggplot(especialidade, aes(x = "", y = ESI, fill = nível_es
   geom_bar(stat = "identity", position = "stack") +
   coord_polar(theta = "y") +
   scale_fill_brewer(palette = "Set3") +
-  theme_minimal() +
-  labs(
-    fill = "Nível de especialidade ecológica", x = "", y = ""
-  ) 
-ggsave("graficos/grafico_ESI_geral.png", plot = grafico_ESI_geral, width = 8, height = 6)
+  theme_void() +
+  labs( title = "Nível de especialidade ecológica",
+    fill = "Níveis",
+    x = "", y = "") 
+ggsave("graficos/grafico_ESI_geral.png", 
+       plot = grafico_ESI_geral, 
+       width = 5, height = 3)
 
 #por gênero
 grafico_ESI_genero <-ggplot(especialidade, 
-                            aes(x = Genus, fill = nível_especialidade)) +
+                            aes(x = Genus, 
+                                fill = nível_especialidade)) +
   geom_bar(position = "fill") + 
   theme_minimal() +
   theme(axis.text.x = element_text(face = "italic", size = 12, angle = 45, hjust = 1)) +
-  labs(
-    fill = "Especialidade ecológica",
+  labs( title = "Especialidade ecológica por Gêneros",
+    fill = "Níveis",
     x = "Gêneros",
     y = "ESI em proporção"
   )
-ggsave("graficos/grafico_ESI_gen.png", plot = grafico_ESI_genero, width = 8, height = 6)
+ggsave("graficos/grafico_ESI_gen.png", 
+       plot = grafico_ESI_genero, width = 5, height = 4)
 
 ##informacao das legendas##
 #RR = Restricted range (global range size<50,000 km2 ) species get a 1
