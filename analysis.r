@@ -178,6 +178,13 @@ shapiro.test(df$Average.Mass)
 # Teste de normalidade para a Altitude
 shapiro.test(df$Elevational.Range)
 
+df %>%
+  group_by(Genus) %>%
+  summarise(
+    Mediana = median(Average.Mass),
+    IQR = IQR(Average.Mass)
+  )
+
 #altitude média por gênero
 media_alt_gen <- df %>%
   group_by(Genus) %>%
